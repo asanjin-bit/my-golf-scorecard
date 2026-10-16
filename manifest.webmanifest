@@ -1,0 +1,25 @@
+{
+  "name": "My Golf Scorecard – Zagreb, Topala & Sarajevo",
+  "short_name": "Golf Scorecard",
+  "description": "An offline golf score tracker for three courses.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fcfdfa",
+  "theme_color": "#123b30",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
