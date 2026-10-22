@@ -1,7 +1,7 @@
 {
-  "name": "My Golf Scorecard – Zagreb, Topala & Sarajevo",
+  "name": "My Golf Scorecard \u00b7 Multiplayer",
   "short_name": "Golf Scorecard",
-  "description": "An offline golf score tracker for three courses.",
+  "description": "Score three golf courses, play with friends, and follow a live leaderboard.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
