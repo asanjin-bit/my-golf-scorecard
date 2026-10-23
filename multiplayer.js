@@ -14,8 +14,8 @@ const randomCode=()=>{const abc='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let b=new Uin
 const roomRef=id=>doc(db,'rounds',id),memberRef=(id,uid)=>doc(db,'rounds',id,'players',uid);
 const filled=s=>s.filter(Number.isInteger).length;
 const tell=(s)=>{$('mp-sync').textContent=s};
-function showRoom(){ $('mp-lobby').classList.add('mpgone');$('mp-active').classList.remove('mpgone');$('mp-indicator').textContent='Group round';$('course').disabled=true; }
-function showLobby(){ $('mp-lobby').classList.remove('mpgone');$('mp-active').classList.add('mpgone');$('mp-indicator').textContent=configured?'Ready':'Setup needed';$('course').disabled=false; }
+function showRoom(){ $('mp-lobby').classList.add('mpgone');$('mp-active').classList.remove('mpgone');$('mp-indicator').textContent='Group round';$('course').disabled=true; document.dispatchEvent(new CustomEvent('golf:room-state',{detail:{active:true}})); }
+function showLobby(){ $('mp-lobby').classList.remove('mpgone');$('mp-active').classList.add('mpgone');$('mp-indicator').textContent=configured?'Ready':'Setup needed';$('course').disabled=false; document.dispatchEvent(new CustomEvent('golf:room-state',{detail:{active:false}})); }
 function clearSubs(){unsubscribe.forEach(f=>f());unsubscribe=[]}
 function compute(p){let s=p.scores||[],pars=roundData?.pars||[];let stroke=0,par=0,holes=0;for(let i=0;i<Math.min(18,s.length);i++)if(Number.isInteger(s[i])){stroke+=s[i];par+=pars[i];holes++}return {...p,stroke,diff:stroke-par,holes};}
 function renderBoard(){const users=roster.map(compute).sort((a,b)=>a.diff-b.diff||b.holes-a.holes||a.name.localeCompare(b.name));$('mp-count').textContent=`${users.length} / 4 players`;$('mp-leaderboard').innerHTML=users.length?`<table class="mplb"><thead><tr><th>Pos</th><th>Player</th><th>Thru</th><th>Strokes</th><th>To par</th></tr></thead><tbody>${users.map((p,i)=>`<tr><td>${i+1}</td><td>${escape(p.name)}${p.uid===user.uid?' (you)':''}</td><td>${p.holes}/18</td><td>${p.stroke}</td><td><strong>${displayDiff(p.diff)}</strong></td></tr>`).join('')}</tbody></table>`:'<p class="mphelp">Waiting for players…</p>';

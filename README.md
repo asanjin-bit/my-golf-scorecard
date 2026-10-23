@@ -42,3 +42,10 @@ Upload new app files into the same repository. On the next connected launch, the
 - **Missing or insufficient permissions**: publish `firestore.rules` correctly; check rules in Firebase Console.
 - **Invitations not found**: verify invite code, Firebase project, online connection, and which repo/URL was opened.
 - **No offline recovery**: iOS/browser settings may deny persistent IndexedDB cache, and anonymous sign-in may require a previous online session.
+
+## Version 3 — separate Individual / Multiplayer screens
+- Home screen defaults to Individual play, as in the original tracker.
+- Tap **Play with friends** to open Create/Join.
+- When a group round becomes active, score-entry and score overview move into the multiplayer screen.
+- Individual play is temporarily locked during an active group round, avoiding accidental group-score syncing; tap **Exit group view** to return. The underlying original tracker data storage is unchanged.
+- **IMPORTANT:** Keep your already configured `firebase-config.js` from your GitHub repository when uploading this update. The packaged config file contains placeholders. No Firestore rules changes are required.
