@@ -1,4 +1,4 @@
-const CACHE='golf-multiplayer-pwa-v3-two-modes';
+const CACHE='golf-multiplayer-pwa-v4-nav-fix';
 const APP=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./multiplayer.js','./firebase-config.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(APP)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));

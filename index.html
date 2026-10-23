@@ -52,29 +52,51 @@ $('new').onclick=()=>{let s=state();if(stats(s.scores).played&&!confirm('Start a
 $('csv').onclick=()=>{let records=[];for(const [id,c] of Object.entries(courses))for(const h of data.rounds[id].history){let st=stats(h.scores,c.pars);records.push([c.name,h.date,st.strokes,st.diff,st.played,...h.scores.map(v=>v??''),h.savedAt||''])}if(!records.length){toast('Save a round before exporting');return}let rows=[['Course','Date','Strokes','To par','Holes played',...Array.from({length:18},(_,i)=>'Hole '+(i+1)),'Saved at'],...records];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');let url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));let a=document.createElement('a');a.href=url;a.download='Golf_Tracker_All_Courses.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 window.GolfTracker={get:()=>({active:data.active,scores:[...state().scores]}),selectCourse:(id)=>{if(courses[id]){data.active=id;persist();render()}},setScores:(id,scores)=>{if(!courses[id]||!Array.isArray(scores)||scores.length!==18)return;data.rounds[id].scores=scores.map(v=>Number.isInteger(v)&&v>=1&&v<=30?v:null);data.active=id;persist();render()},getCourse:(id)=>courses[id]};persist();render()})();
 </script><script>if ('serviceWorker' in navigator && location.protocol.startsWith('http')) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => console.warn('Offline setup unavailable:',err))); }</script><script>
+/* Two-mode navigation: independent of cloud initialization */
 (function(){
-const $=id=>document.getElementById(id);
-const solo=$('solo-view'), group=$('group-view'), personal=$('individual-sections'), slot=$('group-scoring');
+'use strict';
+const $ = id => document.getElementById(id);
+const solo=$('solo-view'), group=$('group-view'), personal=$('individual-sections');
+const slot=$('group-scoring');
+const soloButton=$('mode-solo'), groupButton=$('mode-group'), note=$('mode-note');
 const movable=[document.querySelector('.scorebox'),document.querySelector('#individual-sections .section'),document.querySelector('#holes').closest('.section')];
-const originalPositions=movable.map(node=>{const anchor=document.createComment('scorecard-location');node.parentNode.insertBefore(anchor,node);return {node,anchor};});
-let active=false,mode='solo';
-function setMode(next){
- if(active&&next==='solo')return;
- mode=next;
- const isGroup=next==='group';
- solo.hidden=isGroup;group.hidden=!isGroup;
- personal.hidden=isGroup;
- $('mode-solo').classList.toggle('selected',!isGroup);$('mode-group').classList.toggle('selected',isGroup);
- $('mode-solo').setAttribute('aria-current',isGroup?'false':'page');$('mode-group').setAttribute('aria-current',isGroup?'page');
- window.scrollTo({top:0,behavior:'instant'});
+const locations=movable.map(node=>{const placeholder=document.createComment('original-scorecard-position');node.parentNode.insertBefore(placeholder,node);return {node,placeholder};});
+let inRound=false;
+function navigate(view){
+  if(view==='solo'&&inRound)return;
+  const multiplayer=view==='group';
+  solo.hidden=multiplayer;
+  group.hidden=!multiplayer;
+  personal.hidden=multiplayer;
+  // Explicitly control display, rather than relying on browser-specific hidden behavior.
+  solo.style.display=multiplayer?'none':'';
+  group.style.display=multiplayer?'':'none';
+  personal.style.display=multiplayer?'none':'';
+  soloButton.classList.toggle('selected',!multiplayer);
+  groupButton.classList.toggle('selected',multiplayer);
+  soloButton.setAttribute('aria-current',multiplayer?'false':'page');
+  groupButton.setAttribute('aria-current',multiplayer?'page':'false');
+  window.scrollTo(0,0);
 }
-$('mode-solo').onclick=()=>setMode('solo');$('mode-group').onclick=()=>setMode('group');
-document.addEventListener('golf:room-state',e=>{
- active=!!e.detail.active;
- if(active){movable.forEach(el=>slot.appendChild(el));$('mode-solo').disabled=true; $('mode-note').hidden=false;$('mode-note').textContent='Group round in progress. Scores entered here are shared with your group. Use “Exit group view” to return to individual play.';setMode('group');}
- else{originalPositions.forEach(({node,anchor})=>anchor.parentNode.insertBefore(node,anchor.nextSibling));$('mode-solo').disabled=false;$('mode-note').hidden=true;setMode('solo');}
+soloButton.addEventListener('click',()=>navigate('solo'));
+groupButton.addEventListener('click',()=>navigate('group'));
+document.addEventListener('golf:room-state',event=>{
+ const wasInRound=inRound;
+ inRound=Boolean(event.detail&&event.detail.active);
+ if(inRound){
+   movable.forEach(node=>slot.appendChild(node));
+   soloButton.disabled=true;
+   note.hidden=false;
+   note.textContent='Group round in progress. Scores entered here are shared with your group. Use “Exit group view” to return to individual play.';
+   navigate('group');
+ }else{
+   locations.forEach(({node,placeholder})=>placeholder.parentNode.insertBefore(node,placeholder.nextSibling));
+   soloButton.disabled=false;
+   note.hidden=true;
+   // Do not unexpectedly close the multiplayer lobby during Firebase initialization.
+   if(wasInRound)navigate('solo');
+ }
 });
-const invitation=new URL(location.href).searchParams.has('round');
-if(invitation)setMode('group');
+navigate(new URL(location.href).searchParams.has('round')?'group':'solo');
 })();
 </script><script type="module" src="./multiplayer.js"></script></body></html>
