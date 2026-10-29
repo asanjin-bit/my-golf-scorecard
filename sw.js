@@ -1,4 +1,4 @@
-const CACHE='golf-multiplayer-pwa-v7-simple-hcp-par33';
+const CACHE='golf-multiplayer-pwa-v8-shared-scoreboard';
 const APP=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./multiplayer.js','./firebase-config.js'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(APP)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
